@@ -60,17 +60,17 @@ jobs:
         category: bicep
         sarif_file: bicep.sarif
 
-    - name: Az CLI Create Resource Group
-      uses: Azure/CLI@v1
-      with:
-         inlineScript: |
-           az account set --subscription "2e79e9bc-971e-45dd-8a73-a8e2df84c92d"
-           az account show
-           az deployment sub create \
-           --name deploymentName \
-           --location swedencentral \
-           --template-file ResourceGroupAZ.bicep \
-           --parameters resourceGroupName=rg_we_sec03 resourceGroupLocation=swedencentral
+    # - name: Az CLI Create Resource Group
+    #   uses: Azure/CLI@v1
+    #   with:
+    #      inlineScript: |
+    #        az account set --subscription "2e79e9bc-971e-45dd-8a73-a8e2df84c92d"
+    #        az account show
+    #        az deployment sub create \
+    #        --name deploymentName \
+    #        --location swedencentral \
+    #        --template-file ResourceGroupAZ.bicep \
+    #        --parameters resourceGroupName=rg_we_sec03 resourceGroupLocation=swedencentral
 
     # - name: Az CLI Create Resource Group
     #   uses: Azure/CLI@v1
@@ -81,17 +81,17 @@ jobs:
     #        az deployment sub delete \
     #        --name deploymentName
 
-    # - name: Az CLI Create Resource Group
-    #   uses: Azure/CLI@v1
-    #   with:
-    #      inlineScript: |
-    #        az account set --subscription ${{  env.sub-dktest-01 }}
-    #        az account show
-    #        az deployment sub create \
-    #        --name ${{  env.resourceGroupName }} \
-    #        --location swedencentral \
-    #        --template-file ResourceGroupAZ.bicep \
-    #        --parameters resourceGroupName=${{  env.resourceGroupName }} resourceGroupLocation=${{  env.resourceGroupLocation }}
+    - name: Az CLI Create Resource Group
+      uses: Azure/CLI@v1
+      with:
+         inlineScript: |
+           az account set --subscription ${{  env.sub-dktest-01 }}
+           az account show
+           az deployment sub create \
+           --name ${{  env.resourceGroupName }} \
+           --location swedencentral \
+           --template-file ResourceGroupAZ.bicep \
+           --parameters resourceGroupName=${{  env.resourceGroupName }} resourceGroupLocation=${{  env.resourceGroupLocation }}
 
     # - name: Deploy Storage Account
     #   uses: Azure/cli@v1
