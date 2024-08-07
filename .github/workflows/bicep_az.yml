@@ -1,0 +1,164 @@
+name: 'Bicep'
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+        - main
+    pull_request:
+        branches:
+        - main
+    
+env:
+    resourceGroupName: rg_we_sec05
+    resourceGroupLocation: swedencentral
+    StorageAccountAZ: ./StorageAccountAZ.bicep
+    StorageAccountAZ2: ./StorageAccountAZ2.bicep
+    SAsamalwaremarket02: samalwaremarket02
+    SAsamalwaremarket03: samalwaremarket03
+    SentinelRule01: ./sentinel-rule02AZ.bicep
+    LAWsec01: ./lawAZ.bicep
+    sub-dktest-01:   e4b1d47c-ba4d-436f-90d5-b78b3b3c0b25
+    sub-dktest-02:   2e79e9bc-971e-45dd-8a73-a8e2df84c92d
+
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+  actions: read
+  security-events: write 
+
+
+jobs:
+  terraform:
+    name: 'Bicep'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Bicep
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.CLIENT_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        #subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+        allow-no-subscriptions: true
+    
+    - name: Setup Bicep
+      uses: anthony-c-martin/setup-bicep@v0.3
+    
+    - name: Lint Bicep
+      run: |
+        bicep lint ./${{  env.StorageAccountAZ2 }} --diagnostics-format sarif > bicep.sarif
+    
+    - name: Upload SARIF
+      if: always()
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        category: bicep
+        sarif_file: bicep.sarif
+
+    # - name: Az CLI Create Resource Group
+    #   uses: Azure/CLI@v1
+    #   with:
+    #      inlineScript: |
+    #        az account set --subscription "2e79e9bc-971e-45dd-8a73-a8e2df84c92d"
+    #        az account show
+    #        az deployment sub create \
+    #        --name deploymentName \
+    #        --location swedencentral \
+    #        --template-file ResourceGroupAZ.bicep \
+    #        --parameters resourceGroupName=rg_we_sec03 resourceGroupLocation=swedencentral
+
+    # - name: Az CLI Create Resource Group
+    #   uses: Azure/CLI@v1
+    #   with:
+    #      inlineScript: |
+    #        az account set --subscription "2e79e9bc-971e-45dd-8a73-a8e2df84c92d"
+    #        az account show
+    #        az deployment sub delete \
+    #        --name deploymentName
+
+    # - name: Az CLI Create Resource Group
+    #   uses: Azure/CLI@v1
+    #   with:
+    #      inlineScript: |
+    #        az account set --subscription ${{  env.sub-dktest-01 }}
+    #        az account show
+    #        az deployment sub create \
+    #        --name ${{  env.resourceGroupName }} \
+    #        --location swedencentral \
+    #        --template-file ResourceGroupAZ.bicep \
+    #        --parameters resourceGroupName=${{  env.resourceGroupName }} resourceGroupLocation=${{  env.resourceGroupLocation }}
+
+    # - name: Deploy Storage Account
+    #   uses: Azure/cli@v1
+    #   with:
+    #      inlineScript: |       
+    #        az deployment group create \
+    #        --name ${{ env.SAsamalwaremarket01 }} \
+    #        --resource-group ${{ env.resourceGroupName }} \
+    #        --template-file ${{  env.StorageAccountAZ }}
+
+    # - name: Deploy Storage Account
+    #   uses: Azure/cli@v1
+    #   with :
+    #     inlineScript: |       
+    #         az deployment group delete \
+    #         --name StorageAccountAZ
+    #         --resource-group ${{ env.resourceGroupName }}
+
+    # - name: Deploy Storage Account
+    #   uses: Azure/cli@v1
+    #   with:
+    #      inlineScript: |       
+    #        az deployment group create \
+    #        --name ${{ env.SAsamalwaremarket02 }} \
+    #        --resource-group ${{ env.resourceGroupName }} \
+    #        --template-file ${{  env.StorageAccountAZ }}
+
+    # - name: Deploy Storage Account
+    #   uses: Azure/cli@v1
+    #   with :
+    #     inlineScript: |       
+    #         az deployment group delete \
+    #         --name ${{ env.SAsamalwaremarket02 }} \
+    #         --resource-group ${{ env.resourceGroupName }}
+
+    # - name: Deploy Storage Account
+    #   uses: Azure/cli@v1
+    #   with:
+    #      inlineScript: |       
+    #        az deployment group what-if \
+    #        --name ${{ env.SAsamalwaremarket03 }} \
+    #        --resource-group ${{ env.resourceGroupName }} \
+    #        --template-file ${{  env.StorageAccountAZ2 }} \
+
+    - name: Deploy Storage Account
+      uses: Azure/cli@v1
+      with:
+         inlineScript: |       
+           az deployment group create \
+           --name ${{ env.SAsamalwaremarket03 }} \
+           --resource-group ${{ env.resourceGroupName }} \
+           --template-file ${{  env.StorageAccountAZ2 }} \
+
+    # - name: Deploy LAW
+    #   uses: Azure/cli@v1
+    #   with:
+    #     inlineScript: |       
+    #       az deployment group create \
+    #       --name ${{ env.LAWsec01 }} \
+    #       --resource-group ${{ env.resourceGroupName }} \
+    #       --template-file ${{  env.LAWsec01 }} \
+
+    # - name: Deploy Rule01
+    #   uses: Azure/cli@v1
+    #   with:
+    #     inlineScript: |       
+    #       az deployment group create \
+    #       --name ${{ env.SentinelRule01 }} \
+    #       --resource-group ${{ env.resourceGroupName }} \
+    #       --template-file ${{  env.SentinelRule01 }} \
